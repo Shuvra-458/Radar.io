@@ -1,0 +1,70 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: radar.io-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: radar.io
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d radar.io"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: radar.io-backend:dev
+    container_name: radar.io-backend
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/radar.io
+
+    volumes:
+      - ./backend/app:/app/app
+
+    ports:
+      - "8000:8000"
+
+    command: ["uvicorn", "app.api.server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+    image: radar.io-frontend:dev
+    container_name: radar.io-frontend
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+      - ./UI/src:/app/src
+      - ./UI/index.html:/app/index.html
+      - ./UI/vite.config.ts:/app/vite.config.ts
+
+    depends_on:
+      - backend
+
+    environment:
+      VITE_BACKEND_URL: http://backend:8000
+
+volumes:
+  pgdata:
