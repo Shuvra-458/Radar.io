@@ -3,9 +3,10 @@ import { useState } from "react";
 interface Props {
   onSubmit: (company: string) => void;
   disabled: boolean;
+  placeholder?: string;
 }
 
-export function SearchBox({ onSubmit, disabled }: Props) {
+export function SearchBox({ onSubmit, disabled, placeholder }: Props) {
   const [value, setValue] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
