@@ -78,7 +78,7 @@ async def researcher_node(state: ResearchState) -> dict:
     rprint(f"[cyan]▶ researcher[/cyan] [{task.id}] {task.question}")
 
     # 1. Search - Tavily, one call per sub task
-    hits = await search(task.question, max_results=3)
+    hits = await search(task.question, source_hint=task.source_hint, max_results=3)
     if not hits:
         rprint(f"[yellow] no results for {task.id}[/yellow]")
         return {"docs": [], "findings": []}
