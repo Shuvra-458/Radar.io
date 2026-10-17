@@ -16,6 +16,7 @@ from typing import AsyncIterator
 class Job:
     job_id: str
     company: str
+    mode: str = "competitive"
     status: str = "pending"
     events: list[dict] = field(default_factory=list)
     subscribers: list[asyncio.Queue] = field(default_factory=list)
@@ -59,9 +60,9 @@ class Job:
 # The registry. One process, one dict.
 _JOBS: dict[str, Job] = {}
 
-def create_job(company: str) -> Job:
+def create_job(company: str, mode: str) -> Job:
     job_id = uuid.uuid4().hex
-    job = Job(job_id=job_id, company=company)
+    job = Job(job_id=job_id, company=company, mode=mode)
     _JOBS[job_id] = job
     return job
 
