@@ -19,10 +19,10 @@ function injectCitationLinks(
   report: string,
   citations: Record<string, CitationEntry>
 ): string {
-  return report.replace(/\[(\d+)\]/g, (match, num) => {
+  return report.replace(/[\[【](\d+)[\]】]/g, (match, num) => {
     const entry = citations[num];
     if (!entry) return match;
-    return `[${num}](${entry.url})`;
+    return `[${num}](${entry.url})`; // Converts 【1】 to [1](url)
   });
 }
 

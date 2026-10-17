@@ -67,12 +67,12 @@ async def _run_graph(job: Job) -> None:
     Runs the graph for one job, emitting SSE events as nodes complete.
     """
     job.status = "running"
-    job.emit({"type": "start", "company": job.company})
+    job.emit({"type": "start", "company": job.company, "mode": job.mode})
 
     try:
         config = {"configurable": {"thread_id": job.job_id}}
 
-        async for chunk in _graph.astream({"company": job.company}, config=config):
+        async for chunk in _graph.astream({"company": job.company, "mode": job.mode}, config=config):
             for node_name, update in chunk.items():
                 job.emit({
                     "type": "node",
@@ -89,10 +89,15 @@ async def _run_graph(job: Job) -> None:
             str(k): v for k, v in job.final_state.get("citations", {}).items()
         }
 
+        verdict = job.final_state.get("verdict")
+        verdict_payload = verdict.model_dump() if verdict else None
+
+
         job.emit({
             "type": "complete",
             "report": job.final_state.get("report", ""),
             "citations": citations,
+            "verdict": verdict_payload,
         })
         job.status = "complete"
 
@@ -108,10 +113,10 @@ async def health():
 
 @app.post("/analyze", response_model=AnalyzeResponse)
 async def start_analysis(req: AnalyzeRequest):
-    job = create_job(req.company)
+    job = create_job(req.company, req.mode)
     # Task keeps running even after this handler returns.
     asyncio.create_task(_run_graph(job))
-    rprint(f"[cyan]-> job {job.job_id} started for {req.company}[/cyan]")
+    rprint(f"[cyan]→ job {job.job_id} started: {req.company} ({req.mode})[/cyan]")
     return AnalyzeResponse(job_id=job.job_id, status=job.status)
 
 @app.get("/analyze/{job_id}", response_model=JobStatusResponse)
@@ -127,6 +132,9 @@ async def get_analysis(job_id: str):
         citations = {
             str(k): v for k, v in job.final_state.get("citations", {}).items()
         }
+        v = job.final_state.get("verdict")
+        verdict_payload = v.model_dump() if v else None
+
 
     return JobStatusResponse(
         job_id=job.job_id,
@@ -135,6 +143,7 @@ async def get_analysis(job_id: str):
         error=job.error,
         report=report,
         citations=citations,
+        verdict=verdict_payload,
     )
 
 @app.get("/analyze/{job_id}/stream")
