@@ -1,15 +1,15 @@
-import type { SSEEvent } from "./types";
+import type { Mode, SSEEvent } from "./types";
 
 export interface AnalyzeResponse {
     job_id: string;
     status: string;
 }
 
-export async function startAnalysis(company: string): Promise<AnalyzeResponse> {
+export async function startAnalysis(company: string, mode: Mode): Promise<AnalyzeResponse> {
     const res = await fetch("/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company }),
+        body: JSON.stringify({ company, mode }),
     });
     if (!res.ok) {
         throw new Error(`POST /analyze failed: $[res.status}`);
