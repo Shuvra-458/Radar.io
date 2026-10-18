@@ -63,8 +63,6 @@ services:
     depends_on:
       - backend
 
-    environment:
-      VITE_BACKEND_URL: http://backend:8000
 
 volumes:
   pgdata:
