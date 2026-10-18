@@ -1,6 +1,6 @@
 interface Props {
     company: string;
-    taskCOunt: number;
+    taskCount: number;
     sourceCount: number;
     durationMs: number;
 }
