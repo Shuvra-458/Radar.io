@@ -158,8 +158,12 @@ export default function App() {
 
         {/* Defensive checks for verdict to prevent React crashes */}
         {state.status === "complete" &&
-          state.verdict && (
-            <VerdictPanel verdict={state.verdict} />
+          state.verdict && 
+          state.verdict.dimensions && (
+            <VerdictPanel 
+              verdict={state.verdict} 
+              citations={state.citations}
+            />
           )}
 
         {state.status === "complete" && state.report && (
