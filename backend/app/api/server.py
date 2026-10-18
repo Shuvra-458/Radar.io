@@ -14,6 +14,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from rich import print as rprint
 
 from app.api.jobs import Job, create_job, get_job
@@ -32,6 +33,16 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="Radar.io", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Compiled once, shared across all requests.
 _graph = build_graph(with_checkpointer=True)
