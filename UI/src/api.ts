@@ -1,3 +1,5 @@
+const API_BASE = import.meta.env.VITE_BACKEND_URL || "";
+
 import type { Mode, SSEEvent } from "./types";
 
 export interface AnalyzeResponse {
@@ -6,7 +8,7 @@ export interface AnalyzeResponse {
 }
 
 export async function startAnalysis(company: string, mode: Mode): Promise<AnalyzeResponse> {
-    const res = await fetch("/analyze", {
+    const res = await fetch(`${API_BASE}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ company, mode }),
@@ -26,7 +28,7 @@ export function subscribeToJob(
     onEvent: (event: SSEEvent) => void,
     onTransportError: (err: Event) => void
 ): () => void {
-    const es = new EventSource(`/analyze/${jobId}/stream`);
+    const es = new EventSource(`${API_BASE}/analyze/${jobId}/stream`);
 
     es.onmessage = (msg) => {
         try {
