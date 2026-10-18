@@ -19,7 +19,7 @@ export function SearchBox({ onSubmit, disabled, placeholder }: Props) {
     <form className="search-box" onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Enter a company name (e.g. Stripe, Flipkart, Notion)"
+        placeholder={placeholder ?? "Enter a company name"}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         disabled={disabled}
